@@ -1,0 +1,655 @@
+## Lovelace UI ##
+resources:
+  - url: /local/alarm_control_panel-card.js?v=2
+    type: js
+  - url: /local/thermostat-card.js?v=2
+    type: module
+  - url: /local/plan-coordinates.js?v=2
+    type: js
+  - url: /local/monster-card.js?v=2
+    type: js
+  - url: /local/gauge-card.js?v=2
+    type: js
+  - url: /local/audio-card.js?v=2
+    type: js
+
+
+
+title: Adensville
+views:
+    # The name of a view will be used as tab title.
+    # Might be used for other things in the future.
+  - title: Office
+    icon: mdi:castle
+    # Each view can have a different theme applied. Theme should be defined in the frontend.
+    # The cards to show on this view.
+    cards:
+        # The entities card will take a list of entities and show their state.
+      - type: entities
+        # Title of the entities card
+        title: Office
+        # The entities here will be shown in the same order as specified.
+        entities:
+          - device_tracker.justin_iphone7
+          - light.office_test_lights
+          - switch.office_crown
+          - switch.office_light
+          - switch.office_wall
+          - switch.office_fan
+          - switch.office_lock
+      - type: entity-filter
+        entities:
+          - device_tracker.jackson_iphone
+          - device_tracker.janis7
+          - device_tracker.justin_iphone7
+          - device_tracker.zoes_ipod_touch
+          - device_tracker.dawsons_ipod_touch     
+        state_filter:
+          - home
+        card:
+          type: glance
+          title: Who is Home?
+          show_state: false
+          show_name: false
+      - type: entities
+        entities:
+          - climate.upstairs_ac
+          - climate.upstairs_heat
+          - switch.upstairs_ac
+          - switch.upstairs_furnace
+          - switch.upstairs_fan
+      - type: entity-filter
+        entities:
+          - switch.back_porch
+          - switch.boys_bathroom
+          - switch.boys_shower
+          - switch.front_porch
+          - switch.garage_lights
+          - switch.master_crown
+          - switch.office_crown
+          - switch.office_fan
+          - switch.office_light
+          - switch.office_wall
+          - switch.side_porch
+          - switch.taz_5
+          - switch.theater
+          - switch.toy_room
+          - entity: switch.upstairs_hall
+            name: Hall
+            tap_action: toggle
+        state_filter:
+          - "on"
+        card:
+          type: glance
+          column_width: 20%
+          show_state: false
+      - type: media-control
+        entity: media_player.volumio_volumiohomelocal
+      - type: custom:audio-card
+        media_player: media_player.my_html5_speakers
+#        setup: true
+        devices:
+        - 6fbc50-fbdc2c #my macbook        
+      - type: history-graph
+        hours_to_show: 168
+        refresh_interval: 3600
+        entities:
+          # - entity: sensor.drzzs_xbox
+          #   name: Xbox
+          - sensor.work_week
+      - type: map
+        entities:
+          - device_tracker.jackson_iphone
+          - device_tracker.janis7
+          - device_tracker.justin_iphone7
+          - device_tracker.zoes_ipod_touch
+          - device_tracker.dawsons_ipod_touch
+          - zone.home
+          - zone.work
+      - type: weather-forecast
+        entity: weather.dark_sky
+      - type: custom:monster-card
+        card:
+          type: entities
+          title: Lovely Beautifuls
+          show_state: false
+          column_width: 20%
+        filter:
+          include:
+            - entity_id: "*girls*"
+          exclude:
+            - entity_id: "*BTN"
+            - entity_id: "automation*"
+      - type: custom:monster-card
+        card:
+          type: entities
+          title: Strong Handsoms
+          show_state: false
+          column_width: 20%
+        filter:
+          include:
+            - entity_id: "*boys*"
+            - entity_id: "switch.10024200b4e62d51cd4b"
+          exclude:
+            - entity_id: "*BTN"
+            - entity_id: "automation*"
+      - type: custom:alarm_control_panel-card
+        entity: alarm_control_panel.alarm
+        title: Alarm System
+        states:
+          - arm_home
+          - arm_away
+      - type: entities
+        title: Theater Room
+        entities: 
+          - switch.theater
+          - switch.tv
+          - input_boolean.receiver
+          - switch.volume
+          - input_select.projector_input
+          - media_player.theater
+  - title: cameras
+    icon: mdi:camera
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: picture-entity
+            entity: switch.office_crown
+            tap_action: toggle
+            state_image:
+              "on": /local/office.png
+              "off": /local/office_off.png
+          - type: picture-entity
+            entity: switch.garage_lights
+            tap_action: toggle
+            camera_image: camera.garage
+      - type: horizontal-stack
+        cards:
+          - type: custom:gauge-card
+            title: Office Temp
+            entity: sensor.blink_mountain_room_temperature
+            scale: 40px
+            min: 40
+            max: 90
+            severity:
+              green: 50
+              red: 80
+              amber: 73
+
+          - type: custom:gauge-card
+            title: Toy Room Temp
+            entity: sensor.blink_toy_room_temperature
+            scale: 40px
+            min: 40
+            max: 90
+            severity:
+              green: 50
+              red: 80
+              amber: 73
+          - type: custom:gauge-card
+            title: Garage Temp
+            entity: sensor.blink_garage_temperature
+            scale: 40px
+            min: 40
+            max: 90
+            severity:
+              green: 50
+              red: 80
+              amber: 73
+      - type: vertical-stack
+        cards:
+          - type: picture-glance
+            image: /local/Rainbow.jpg
+            title: Office
+            entities:
+              - device_tracker.justin_iphone7
+              - entity: light.office_test_lights
+                icon: mdi:football
+              - entity: switch.office_crown
+                icon: mdi:power
+              - switch.office_light
+              - switch.office_wall
+              - switch.office_fan
+              - switch.office_lock
+          - type: iframe
+            url: http://volumio-home.local/
+            aspect_ratio: 100%
+  - title: floorplan
+    icon: mdi:earth
+    panel: true
+    cards:
+      - type: vertical-stack
+        cards:
+        - type: custom:plan-coordinates
+        - type: picture-elements
+          image: /local/HHC1.png 
+          elements:
+            # - type: icon
+            #   tap_action: navigate
+            #   navigation_path: /lovelace/0
+            #   icon: mdi:death-star-variant
+            #   style: 
+            #     top: 95%
+            #     left: 95%
+            #     color: cyan
+############## Garage ###############
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.88800443bcddc2e42e95
+              style:
+                top: 36%
+                left: 32%
+            - type: image
+              tap_action: toggle
+              entity: switch.4336784084f3eb5d4b45
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+              style:
+                top: 44%
+                left: 24%
+                width: 5%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg)
+            - type: image
+              tap_action: toggle
+              entity: switch.4336784084f3eb5cedea
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+              style:
+                top: 40%
+                left: 15%
+                width: 5%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg) 
+            - type: state-label
+              entity: sensor.blink_garage_temperature
+              style:
+                top: 17%
+                left: 25%
+                font-weight: bold
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.side_porch
+              style:
+                top: 49%
+                left: 20%
+            - type: state-icon
+              entity: binary_sensor.garage_fridge
+              style:
+                top: 44%
+                left: 37%
+            - type: state-icon
+              entity: binary_sensor.garage_motion
+              style:
+                top: 43%
+                left: 31%
+            - type: state-icon
+              tap_action: toggle
+              entity: cover.double
+              style:
+                top: 20%
+                left: 39%
+            - type: state-icon
+              tap_action: toggle
+              entity: cover.test
+              style:
+                top: 23%
+                left: 23%
+############# Main Floor ##############
+            - type: state-label
+              entity: sensor.blink_piano_room_temperature
+              style:
+                top: 50%
+                left: 53%
+                font-weight: bold
+                color: white
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.back_porch
+              style:
+                top: 82%
+                left: 34%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.front_porch
+              style:
+                top: 30%
+                left: 62%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.10024200b4e62d51d3d7
+              style:
+                top: 49%
+                left: 44%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.airfilter
+              style:
+                top: 48%
+                left: 52%
+
+############## Master Bedroom ##############
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.10024200b4e62d51d558
+              style:
+                top: 56%
+                left: 74%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.master_crown
+              style:
+                top: 93%
+                left: 90%
+            - type: image
+              tap_action: toggle
+              entity: switch.master_fan
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+                "unavailable": /local/fan.png
+              style:
+                top: 84%
+                left: 87%
+                width: 6%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg)
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.master_light
+              style:
+                top: 82%
+                left: 78%
+
+###########
+###########
+
+  - title: Upstairs
+    icon: mdi:home-heart
+    panel: true 
+    cards:
+      - type: vertical-stack
+        cards:
+        - type: custom:plan-coordinates
+        - type: picture-elements
+          image: /local/HHC_2b.png
+          elements:               
+##### Toy Room ########
+            - type: image
+              tap_action: toggle
+              entity: switch.4336784084f3eb5d6215
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+              style:
+                top: 13%
+                left: 44%
+                width: 4%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg)
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.toy_room
+              style:
+                top: 27%
+                left: 41%
+            - type: state-label
+              entity: sensor.blink_toy_room_temperature
+              style:
+                top: 14%
+                left: 37%
+                font-weight: bold
+            - type: custom:thermostat-card
+              entity: climate.toy_room_heat
+              style:
+                left: 53%
+                top: 23%
+                width: 13%
+              ambient_temperature: sensor.blink_toy_room_temperature
+              hightlight_tap: true
+              no_card: true
+##### Boys Room ########
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.boys_bathroom_lock
+              style:
+                left: 47.5%  
+                top: 84.5%           
+            - type: image
+              tap_action: toggle
+              entity: switch.boys_fan
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+                "unavailable": /local/fan.png
+              style:
+                top: 48%
+                left: 33%
+                width: 5%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg) 
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.boys_fan_light
+              style:
+                top: 55%
+                left: 33%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.boys_light
+              style:
+                top: 47%
+                left: 28%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.10024200b4e62d51cd4b
+              style:
+                top: 82.5%
+                left: 50.5%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.boys_shower
+              style:
+                top: 90%
+                left: 49%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.boys_bathroom
+              style:
+                top: 77%
+                left: 49%
+            - type: state-label
+              entity: sensor.boys_room_temp
+              style:
+                top: 37%
+                left: 30%
+                color: white
+                font-weight: bold
+##### Girls Room ########
+            - type: image
+              tap_action: toggle
+              entity: switch.girls_fan
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+                "unavailable": /local/fan.png
+              style:
+                top: 44%
+                left: 60%
+                width: 5%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg) 
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.girls_light
+              style:
+                top: 31%
+                left: 54%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.girls_wall
+              style:
+                top: 51%
+                left: 60%
+            - type: state-label
+              entity: sensor.girls_room_temp
+              style:
+                top: 37%
+                left: 60%
+                color: white
+                font-weight: bold
+######### Hall ############
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.upstairs_hall
+              style:
+                top: 61%
+                left: 47%                  
+            - type: state-label
+              entity: sensor.upstairs_temp
+              style:
+                top: 53%
+                left: 49%
+                font-weight: bold
+            - type: custom:thermostat-card
+              entity: climate.upstairs_ac
+              style:
+                left: 63%
+                top: 70%
+                width: 15%
+              ambient_temperature: sensor.average_upstairs_temp
+              hightlight_tap: true
+              no_card: true
+            # - type: custom:thermostat-card
+            #   entity: climate.upstairs_heat
+            #   style:
+            #     left: 63%
+            #     top: 89%
+            #     width: 15%
+            #   ambient_temperature: sensor.average_upstairs_temp
+            #   hightlight_tap: true
+            #   no_card: true
+            - type: custom:thermostat-card
+              entity: climate.kids_bedroom_heat
+              style:
+                left: 20%
+                top: 65%
+                width: 13%
+              ambient_temperature: sensor.average_kids_temp
+              hightlight_tap: true
+              no_card: true
+########### Office #################
+            - type: state-label
+              entity: sensor.blink_mountain_room_temperature
+              style:
+                top: 84%
+                left: 24%
+                color: white
+                font-weight: bold
+            - type: state-icon
+              entity: sensor.printing_status
+              style:
+                top: 88%
+                left: 43%
+            - type: state-icon
+              entity: sensor.octoprint_current_state
+              style:
+                top: 92%
+                left: 43%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.office_lock
+              style:
+                top: 73%
+                left: 37%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.office_light
+              style:
+                top: 78%
+                left: 32%
+            - type: state-icon
+              tap_action: toggle
+              entity: switch.office_crown
+              style:
+                top: 92%
+                left: 26%
+            - type: image
+              tap_action: toggle
+              entity: switch.office_fan
+              state_image:
+                "on": /local/fanY.gif
+                "off": /local/fan.png
+              style:
+                top: 85%
+                left: 32%
+                width: 6%
+              state_filter:
+                "on": blur(2px)
+                "off": hue-rotate(20deg)
+            # - type: image
+            #   entity: light.office_test_lights
+            #   tap_action: call-service
+            #   service: input_select.select_option
+            #   service_data:
+            #     entity_id: input_select.office_test_led_effect
+            #     option: Hail
+            #   state_image:
+            #     "on": /local/hail_1.png
+            #     "off": /local/hail_2.png
+            #   style:
+            #     left: 56%
+            #     top: 90%
+            #     width: 4%
+            - type: image
+              entity: light.office_test_lights
+              tap_action: call-service
+              service: input_select.select_option
+              service_data:
+                entity_id: input_select.office_test_led_effect
+                option: Hail
+              state_image:
+                "on": /local/hail_1.png
+                "off": /local/hail_2.png
+              style:
+                left: 56%
+                top: 90%
+                width: 4%
+            - type: image
+              entity: device_tracker.justin_iphone7
+              style:
+                left: 31%
+                top: 92%
+                width: 5%
+              state_image:
+                "Home": /local/DrZzs_Emoji.png
+                "Work": /local/money-bag.png
+                "Away": /local/me_car.png
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              

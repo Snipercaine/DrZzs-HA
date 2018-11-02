@@ -1,0 +1,1595 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret lat
+  longitude: !secret long
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 1556
+  # metric for Metric, imperial for Imperial
+  unit_system: imperial
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/Denver
+  # UI
+  customize: !include customize.yaml
+weather:
+  - platform: darksky
+    api_key: !secret darksky
+    
+panel_iframe:
+  tasmoadmin:
+    title: 'TasmoAdmin'
+    icon: 'mdi:robot'
+    url: 'http://192.168.1.71:9541/'
+  # ide:
+  #   title: 'IDE'
+  #   icon: 'mdi:bomb'
+  #   url: 'http://192.168.1.71:8321/'
+  nodered:
+    title: 'Node-Red'
+    icon: 'mdi:shuffle-variant'
+    url: 'http://192.168.1.71:1880/'
+  influxdb:
+    title: InfluxDB
+    icon: mdi:chart-areaspline
+    url: http://192.168.1.71:8888
+# panel_custom:
+#   - name: floorplan
+#     sidebar_title: Floorplan
+#     sidebar_icon: mdi:home
+#     url_path: floorplan
+#     config: !include floorplan.yaml
+
+zone: !include zones.yaml
+
+######################################
+
+mqtt:
+  broker: 192.168.1.71
+  port: 1883
+  client_id: home-assistant-1
+  username: !secret mqtt_user
+  password: !secret mqtt_pw
+  discovery: true
+  discovery_prefix: homeassistant
+  
+###################################################
+##### OctoPrint #####
+###################################################
+    
+#### Octoprint Server ####
+octoprint:
+    host: 192.168.1.17
+    api_key: !secret octopi_key
+###################################################
+##### Web Camera #####
+###################################################  
+ffmpeg:
+
+camera:
+    # - platform: generic
+    #   name: Friends Around the World
+    #   still_image_url: https://www.google.com/maps/d/embed?mid=1sj3geKvWxU39VYUU5OSnp0_HaKJrqcwa
+    #   limit_refresh_to_url_change: true 
+    - platform: foscam
+      ip: 192.168.1.38
+      username: !secret foscam_user
+      password: !secret foscam_pw
+#    - platform: ring
+    - platform: mjpeg
+      mjpeg_url: http://192.168.1.17:8080/?action=stream/
+      name: _OctoPrint
+    - platform: amcrest
+#    - platform: arlo
+#    - platform: ffmpeg
+#      input: 
+amcrest:
+  - host: 192.168.1.38
+    username: admin
+    password: !secret foscam_pw
+
+#################################################
+##### Konnected Alarm ###########################
+#################################################
+konnected:
+  access_token: !secret konnected_token
+  api_host: http://192.168.1.71:8123
+  devices:
+    - id: dc4f220fb4c4
+      binary_sensors:
+        - zone: 1
+          type: door
+          name: Front Door
+        - zone: 2
+          type: door
+          name: Garage Entry
+        - zone: 3
+          type: door
+          name: Kitchen Door
+        - zone: 4
+          type: window
+          name: Kitchen Windows
+        - zone: 5
+          type: window
+          name: Front Windows
+        - zone: 6
+          type: window
+          name: Master Bath
+    - id: dc4f220fb350
+      binary_sensors:
+        - zone: 1
+          type: window
+          name: Master Bedroom
+        - zone: 2
+          type: window
+          name: Theater Windows
+        - zone: 3
+          type: door
+          name: Basement Doors
+        - zone: 4
+          type: window
+          name: Hafens Room
+        - zone: 5
+          type: window
+          name: Grandmas Room
+        - zone: 6
+          type: window
+          name: Gym Window
+
+alarm_control_panel:
+  - platform: manual
+    name: Alarm
+    code: !secret alarm_code
+    trigger_time: 300
+    disarmed:
+      trigger_time: 0
+    armed_home:
+      delay_time: 0
+      pending_time: 0
+    armed_away:
+      delay_time: 60
+      pending_time: 30
+    triggered:
+      pending_time: 0
+
+
+#######################################
+############## Holiday Outside Lights ######
+#######################################
+light:
+  - platform: mqtt
+    name: "Boys Closet" #B1 in the closet
+    command_topic: "cmnd/Boys_Closet/power"
+    state_topic: "stat/Boys_Closet/POWER"
+    rgb_state_topic: "stat/Boys_Closet/color"
+    rgb_command_topic: "cmnd/Boys_Closet/color"
+    brightness_state_topic: "stat/Boys_Closet/dimmer"
+    brightness_command_topic: "cmnd/Boys_Closet/dimmer"
+    color_temp_state_topic: "stat/Boys_Closet/CT"
+    color_temp_command_topic: "cmnd/Boys_Closet/CT"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Holiday Lights"
+    command_topic: "bruh/mqttstrip/setpower"
+    state_topic: "bruh/mqttstrip/setpowerpub"
+    rgb_state_topic: "bruh/mqttstrip/setcolorpub"
+    rgb_command_topic: "bruh/mqttstrip/setcolor"
+    brightness_state_topic: "bruh/mqttstrip/setbrightnesspub"
+    brightness_command_topic: "bruh/mqttstrip/setbrightness"
+    optimistic: false
+
+  - platform: mqtt
+    name: "Side Lights"
+    command_topic: "bruh/mqttstripSide/setpower"
+    state_topic: "bruh/mqttstripSide/setpowerpub"
+    rgb_state_topic: "bruh/mqttstripSide/setcolorpub"
+    rgb_command_topic: "bruh/mqttstripSide/setcolor"
+    brightness_state_topic: "bruh/mqttstripSide/setbrightnesspub"
+    brightness_command_topic: "bruh/mqttstripSide/setbrightness"
+    optimistic: false
+    
+  - platform: mqtt
+    name: "Office Test Lights"
+    command_topic: "bruh/mqttstripTEST/setpower"
+    state_topic: "bruh/mqttstripTEST/setpowerpub"
+    rgb_state_topic: "bruh/mqttstripTEST/setcolorpub"
+    rgb_command_topic: "bruh/mqttstripTEST/setcolor"
+    brightness_state_topic: "bruh/mqttstripTEST/setbrightnesspub"
+    brightness_command_topic: "bruh/mqttstripTEST/setbrightness"
+    optimistic: false
+
+  - platform: mqtt
+    name: "Tree Lights"
+    command_topic: "bruh/mqttstripTree/setpower"
+    state_topic: "bruh/mqttstripTree/setpowerpub"
+    rgb_state_topic: "bruh/mqttstripTree/setcolorpub"
+    rgb_command_topic: "bruh/mqttstripTree/setcolor"
+    brightness_state_topic: "bruh/mqttstripTree/setbrightnesspub"
+    brightness_command_topic: "bruh/mqttstripTree/setbrightness"
+    optimistic: false
+
+  - platform: mqtt
+    name: "Magic Box"
+    command_topic: "bruh/mqttstripBox/setpower"
+    state_topic: "bruh/mqttstripBox/setpowerpub"
+    rgb_state_topic: "bruh/mqttstripBox/setcolorpub"
+    rgb_command_topic: "bruh/mqttstripBox/setcolor"
+    brightness_state_topic: "bruh/mqttstripBox/setbrightnesspub"
+    brightness_command_topic: "bruh/mqttstripBox/setbrightness"
+    optimistic: false
+
+input_select:
+  desk_leds:
+    name: Desk LEDs
+    options:
+      - "Blue"
+      - "Maize"
+      - "Green"
+      - "Red"
+      - "Smooth"
+#input_select:
+  projector_input:
+    name: Projector Input
+    options:
+      - "Roku" #VCR
+      - "Cable" #CBL
+      - "DVD" #Game
+      - "extra" #BD
+  holiday_led_effect:
+    name: Holiday LED Effect
+    options:
+     - "Christmas"
+     - "Candy Cane"
+     - "Holly Jolly"
+     - "Valentine"
+     - "Lovey Day"
+     - "St Patty"
+     - "Easter"
+     - "USA"
+     - "Independence"
+     - "Go Blue"
+     - "Hail"
+     - "Touchdown"
+     - "Halloween"
+     - "Punkin"
+     - "Thanksgiving"
+     - "Turkey Day"
+     - "BPM"
+     - "Confetti"
+     - "Cyclon Rainbow"
+     - "Dots"
+     - "Fire"
+     - "Glitter"
+     - "Juggle"
+     - "Lightning"
+     - "Police All"
+     - "Police One"
+     - "Rainbow"
+     - "Rainbow with Glitter"
+     - "Ripple"
+     - "Sinelon"
+     - "Solid"
+     - "Twinkle"
+    initial: "Solid"
+
+  side_led_effect:
+    name: Side LED Effect
+    options:
+     - "Christmas"
+     - "Candy Cane"
+     - "Holly Jolly"
+     - "Valentine"
+     - "Lovey Day"
+     - "St Patty"
+     - "Easter"
+     - "USA"
+     - "Independence"
+     - "Go Blue"
+     - "Hail"
+     - "Touchdown"
+     - "Halloween"
+     - "Punkin"
+     - "Thanksgiving"
+     - "Turkey Day"
+     - "BPM"
+     - "Confetti"
+     - "Cyclon Rainbow"
+     - "Dots"
+     - "Fire"
+     - "Glitter"
+     - "Juggle"
+     - "Lightning"
+     - "Police All"
+     - "Police One"
+     - "Rainbow"
+     - "Rainbow with Glitter"
+     - "Ripple"
+     - "Sinelon"
+     - "Solid"
+     - "Twinkle"
+    initial: "Solid"
+    
+  all_leds:
+    name: All LEDs
+    options:
+     - "Christmas"
+     - "Candy Cane"
+     - "Holly Jolly"
+     - "Valentine"
+     - "Lovey Day"
+     - "St Patty"
+     - "Easter"
+     - "USA"
+     - "Independence"
+     - "Go Blue"
+     - "Hail"
+     - "Touchdown"
+     - "Halloween"
+     - "Punkin"
+     - "Thanksgiving"
+     - "Turkey Day"
+     - "BPM"
+     - "Confetti"
+     - "Cyclon Rainbow"
+     - "Dots"
+     - "Fire"
+     - "Glitter"
+     - "Juggle"
+     - "Lightning"
+     - "Police All"
+     - "Police One"
+     - "Rainbow"
+     - "Rainbow with Glitter"
+     - "Ripple"
+     - "Sinelon"
+     - "Solid"
+     - "Twinkle"
+    initial: "Solid"
+
+  office_test_led_effect:
+    name: Office Test LED Effect
+    options:
+     - "Christmas"
+     - "Candy Cane"
+     - "Holly Jolly"
+     - "Valentine"
+     - "Lovey Day"
+     - "St Patty"
+     - "Easter"
+     - "USA"
+     - "Independence"
+     - "Go Blue"
+     - "Hail"
+     - "Touchdown"
+     - "Halloween"
+     - "Punkin"
+     - "Thanksgiving"
+     - "Turkey Day"
+     - "BPM"
+     - "Confetti"
+     - "Cyclon Rainbow"
+     - "Dots"
+     - "Fire"
+     - "Glitter"
+     - "Juggle"
+     - "Lightning"
+     - "Police All"
+     - "Police One"
+     - "Rainbow"
+     - "Rainbow with Glitter"
+     - "Ripple"
+     - "Sinelon"
+     - "Solid"
+     - "Twinkle"
+    initial: "Solid"
+
+  tree_led_effect:
+    name: Tree LED Effect
+    options:
+     - "Christmas"
+     - "Candy Cane"
+     - "Holly Jolly"
+     - "Valentine"
+     - "Lovey Day"
+     - "St Patty"
+     - "Easter"
+     - "USA"
+     - "Independence"
+     - "Go Blue"
+     - "Hail"
+     - "Touchdown"
+     - "Halloween"
+     - "Punkin"
+     - "Thanksgiving"
+     - "Turkey Day"
+     - "BPM"
+     - "Confetti"
+     - "Cyclon Rainbow"
+     - "Dots"
+     - "Fire"
+     - "Glitter"
+     - "Juggle"
+     - "Lightning"
+     - "Police All"
+     - "Police One"
+     - "Rainbow"
+     - "Rainbow with Glitter"
+     - "Ripple"
+     - "Sinelon"
+     - "Solid"
+     - "Twinkle"
+    initial: "Solid"
+
+  box_led_effect:
+    name: Magic Box Effect
+    options:
+     - "Christmas"
+     - "Candy Cane"
+     - "Holly Jolly"
+     - "Valentine"
+     - "Lovey Day"
+     - "St Patty"
+     - "Easter"
+     - "USA"
+     - "Independence"
+     - "Go Blue"
+     - "Hail"
+     - "Touchdown"
+     - "Halloween"
+     - "Punkin"
+     - "Thanksgiving"
+     - "Turkey Day"
+     - "BPM"
+     - "Confetti"
+     - "Cyclon Rainbow"
+     - "Dots"
+     - "Fire"
+     - "Glitter"
+     - "Juggle"
+     - "Lightning"
+     - "Police All"
+     - "Police One"
+     - "Rainbow"
+     - "Rainbow with Glitter"
+     - "Ripple"
+     - "Sinelon"
+     - "Solid"
+     - "Twinkle"
+    initial: "Rainbow"
+  
+  # hass_theme:
+  #   name: HASS themes
+  #   options:
+  #     - default
+  #     - solarized
+  #     - PmxMononight
+  #     - wood
+  #     - Christmas
+  #     - Tester
+  #   initial: wood
+  #   icon: mdi:theme-light-dark
+
+  # spotify_playlist:
+  #   name: 'Playlist:'
+  #   options:
+  #     - Piano Guys
+  #     - Kidz Bop
+  #     - LDS Music
+  #     - Broadway
+  #     - Hair Bands
+  #     - Elvis
+  #     - MJ
+  #     - Metallica
+  #     - Country
+  #     - Daddy
+  #   icon: mdi:spotify
+  # spotify_source:
+  #   name: 'Source:'
+  #   options:
+  #     - AudioCast
+  #   initial: AudioCast
+  #   icon: mdi:speaker-wireless
+
+input_number:
+  # spotify_volume:
+  #   name: Volume
+  #   icon: mdi:volume-high
+  #   min: 0
+  #   max: 1
+  #   step: 0.05
+  animation_speed:
+    name: Animation Speed
+    initial: 150
+    min: 1
+    max: 150
+    step: 10
+  all_animation_speed:
+    name: All Animation Speed
+    initial: 150
+    min: 1
+    max: 150
+    step: 10
+  side_animation_speed:
+    name: Side Animation Speed
+    initial: 150
+    min: 1
+    max: 150
+    step: 10
+  test_animation_speed:
+    name: Test Animation Speed
+    initial: 150
+    min: 1
+    max: 150
+    step: 10
+  tree_animation_speed:
+    name: Tree Animation Speed
+    initial: 150
+    min: 1
+    max: 150
+    step: 10
+  box_animation_speed:
+    name: Box Animation Speed
+    initial: 150
+    min: 1
+    max: 150
+    step: 10
+
+# Enables the frontend
+frontend:
+  themes: !include_dir_merge_named themes/
+  # extra_html_url:
+  #   - /local/custom_ui/state-card-floorplan.html
+
+http:
+  # Uncomment this to add a password (recommended!)
+  api_password: !secret http_password
+  # Uncomment this if you are using SSL or running in Docker etc
+  base_url: !secret http_url
+
+# Checks for available updates
+updater:
+
+# Blink security camera system
+blink:
+  username: !secret blink_user
+  password: !secret blink_pw
+  
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time.
+history:
+
+history_graph:
+  gr1:
+    name: Xbox
+    entities:
+      - sensor.i_am_zerp
+      - sensor.bearbait16
+      - sensor.dr_zzs
+    hours_to_show: 168
+    refresh: 3600
+# View all events in a logbook
+logbook:
+
+# Track the sun
+sun:
+
+# Weather Prediction
+###################################################
+##### Sensors #####
+###################################################
+
+sensor:
+    - platform: min_max
+      name: "Average Upstairs Temp"
+      type: "mean"
+      round_digits: 1
+      entity_ids:
+        - sensor.blink_toy_room_temperature
+        - sensor.blink_mountain_room_temperature
+        - sensor.upstairs_temp
+        - sensor.boys_room_temp
+        - sensor.girls_room_temp
+    - platform: min_max
+      name: "Average Kids Temp"
+      type: "mean"
+      round_digits: 1
+      entity_ids:
+        - sensor.boys_room_temp
+        - sensor.girls_room_temp
+        - sensor.blink_mountain_room_temperature
+    - platform: min_max
+      name: "Average Main Temp"
+      type: "mean"
+      round_digits: 1
+      entity_ids:
+        - sensor.master_bedroom_temp
+        - sensor.blink_piano_room_temperature
+        - sensor.kitchen_temp
+    - platform: mqtt
+      state_topic: 'tele/masterBR/SENSOR'
+      name: 'Master Bedroom Temp' #AM2301
+      unit_of_measurement: '°F'
+      value_template: '{{ value_json.AM2301.Temperature }}'
+    - platform: mqtt
+      state_topic: 'tele/GarageLights/SENSOR'
+      name: 'Kitchen Temp' #AM2301
+      unit_of_measurement: '°F'
+      value_template: '{{ value_json.AM2301.Temperature }}'
+    - platform: mqtt
+      state_topic: 'tele/boys/SENSOR'
+      name: 'Boys Room Temp' #AM2301
+      unit_of_measurement: '°F'
+      value_template: '{{ value_json.AM2301.Temperature }}'
+    - platform: mqtt
+      state_topic: 'tele/T1_US/SENSOR'
+      name: 'Girls Room Temp' #AM2301
+      unit_of_measurement: '°F'
+      value_template: '{{ value_json.AM2301.Temperature }}'
+    - platform: mqtt
+      state_topic: 'tele/officecrown/SENSOR'
+      name: 'Office Temp' #AM2301
+      unit_of_measurement: '°F'
+      value_template: '{{ value_json.AM2301.Temperature }}'
+    - platform: mqtt
+      state_topic: 'tele/ThermoZztat/SENSOR'
+      name: 'Upstairs Temp' #AM2301
+      unit_of_measurement: '°F'
+      value_template: '{{ value_json.AM2301.Temperature }}'
+    - platform: mqtt
+      state_topic: 'tele/ThermoZztat/SENSOR'
+      name: 'Upstairs Humidity'
+      unit_of_measurement: '%'
+      value_template: '{{ value_json.AM2301.Humidity }}'
+
+    # - platform: mqtt
+    #   name: "Sub Count"
+    #   state_topic: "youtubesubs/number"
+    # - platform: mqtt
+    #   name: "Subs New"
+    #   state_topic: "youtubesubs/change"
+    
+    - platform: pvoutput
+      system_id: 61105
+      api_key: !secret Solar_API
+      scan_interval: 150
+    - platform: template
+      sensors:
+        # power_consumption:
+        #   value_template: '{% if is_state_attr("sensor.pvoutput", "power_consumption", "NaN") %}0{% else %}{{ states.sensor.pvoutput.attributes.power_consumption }}{% endif %}'
+        #   friendly_name: 'Using'
+        #   unit_of_measurement: 'Watt'
+        # energy_consumption:
+        #   value_template: '{{ "%0.1f"|format(states.sensor.pvoutput.attributes.energy_consumption|float/1000) }}'
+        #   friendly_name: 'Used'
+        #   unit_of_measurement: 'kWh'
+        power_generation:
+          value_template: '{% if is_state_attr("sensor.pvoutput", "power_generation", "NaN") %}0{% else %}{{ states.sensor.pvoutput.attributes.power_generation }}{% endif %}'
+          friendly_name: 'Generating'
+          unit_of_measurement: 'Watt'
+        energy_generation:
+          value_template: '{% if is_state_attr("sensor.pvoutput", "energy_generation", "NaN") %}0{% else %}{{ "%0.2f"|format(states.sensor.pvoutput.attributes.energy_generation|float/1000) }}{% endif %}'
+          friendly_name: 'Generated'
+          unit_of_measurement: 'kWh'
+           
+    - platform: socialblade
+      channel_id: !secret socialblade
+    - platform: google_wifi
+      host: 192.168.1.1
+      name: Internet
+    - platform: mqtt
+      name: POW Current
+      state_topic: "stat/Taz_5/STATUS10"
+      value_template: "{{ value_json.StatusSNS.ENERGY.Current }}"
+      unit_of_measurement: 'amps'
+    - platform: mqtt
+      name: POW Power
+      state_topic: "stat/Taz_5/STATUS10"
+      value_template: "{{ value_json.StatusSNS.ENERGY.Power }}"
+      unit_of_measurement: 'watts'
+    - platform: mqtt
+      name: POW Voltage
+      state_topic: "stat/Taz_5/STATUS10"
+      value_template: "{{ value_json.StatusSNS.ENERGY.Voltage }}"
+      unit_of_measurement: 'volts'
+    - platform: history_stats
+      name: Zach Xbox
+      entity_id: sensor.i_am_zerp
+      state: 'Online'
+      type: time
+      start: '{{ as_timestamp( now().replace(hour=0).replace(minute=0).replace(second=0) ) - now().weekday() * 86400 }}'
+      end: '{{ now() }}'
+    - platform: history_stats
+      name: Jackson Xbox
+      entity_id: sensor.bearbait16
+      state: 'Online'
+      type: time
+      start: '{{ as_timestamp( now().replace(hour=0).replace(minute=0).replace(second=0) ) - now().weekday() * 86400 }}'
+      end: '{{ now() }}'
+    - platform: history_stats
+      name: DrZzs Xbox
+      entity_id: sensor.dr_zzs
+      state: 'Online'
+      type: time
+      start: '{{ as_timestamp( now().replace(hour=0).replace(minute=0).replace(second=0) ) - now().weekday() * 86400 }}'
+      end: '{{ now() }}'
+    - platform: history_stats
+      name: Work Week
+      entity_id: device_tracker.justin_iphone7
+      state: 'Work'
+      type: time
+      end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+      duration:
+        days: 8
+    - platform: history_stats
+      name: Work Month
+      entity_id: device_tracker.justin_iphone7
+      state: 'Work'
+      type: time
+      end: '{{ now().replace(hour=0).replace(minute=0).replace(second=0) }}'
+      duration:
+        days: 30
+
+    - platform: xbox_live
+      api_key: !secret xboxapi_token
+      xuid:
+        - !secret DrZzs
+        - !secret IROTRAS
+        - !secret Zerp
+        - !secret BearBait
+        - !secret BlueMan
+    
+    - platform: statistics
+      name: Leaf Watts Added  
+      entity_id: sensor.adensville_energy_added
+      value_template: '{{ (states("sensor.adensville_energy_added") | int / 1000) }}'
+
+    - platform: ring
+    - platform: time_date
+      display_options:
+        - 'date_time'
+    # Weather
+    - platform: yr
+      monitored_conditions:
+        - temperature
+        - symbol
+    
+    #### Templates ####
+    - platform: template
+      sensors:
+        # 3D Printer sensors
+        # hotend:
+        #   friendly_name: 'Hotend'
+        #   value_template: '{{ ((states.sensor.octoprint_actual_tool0_temp.state | float-32) | float*(5/9)) | round(1) }}'
+        #   # NOT WORKING - unit_of_measurement: "°C"
+        # bed:
+        #   friendly_name: "Bed"
+        #   value_template: '{{ ((states.sensor.octoprint_actual_bed_temp.state | float-32) | float*(5/9)) | round(1) }}'
+        #   # NOT WORKING - unit_of_measurement: "°C"
+        printing_status:
+          friendly_name: 'Printing Status'
+          value_template: '{{states.binary_sensor.octoprint_printing.state}}'
+          icon_template: '{% if is_state("binary_sensor.octoprint_printing", "off") %}mdi:sleep{% else %}mdi:printer-3d{% endif %}'
+        # printing_error_status:
+        #   friendly_name: 'Printing Error Status'
+        #   value_template: '{{states.binary_sensor.octoprint_printing_error.state}}'
+        #   icon_template: '{% if is_state("binary_sensor.octoprint_printing_error", "off") %}mdi:thumb-up-outline{% else %}mdi:thumb-down{% endif %}'
+
+    #OctoPrint
+    - platform: octoprint
+      name: OctoPrint
+      monitored_conditions:
+        - Current State
+#        - Temperatures
+        - Job Percentage
+      
+    # Time and Date
+    - platform: time_date
+      display_options:
+        #- 'time'
+        #- 'date'
+        #- 'beat'  
+
+ ###################################################
+ ##### Binary Sensors #####
+###################################################
+
+binary_sensor:
+    - platform: mqtt
+      name: "Boys Toilet"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "0F800E"
+      payload_off: "0F800A"
+      optimistic: false
+      qos: 1
+      retain: false
+    - platform: mqtt
+      name: "Main Toilet"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "F7EF0E"
+      payload_off: "F7EF0A"
+      optimistic: false
+      qos: 1
+      retain: false
+    - platform: mqtt
+      name: "Master Toilet"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "0DC30E"
+      payload_off: "0DC30A"
+      optimistic: false
+      qos: 1
+      retain: false
+    - platform: mqtt
+      state_topic: "tele/RF_Bridge/RESULT"
+      name: 'Garage Motion'
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: 'D54C1E'
+      payload_off: 'D54C1Eoff'
+      device_class: motion
+      optimistic: false
+      qos: 1
+      retain: false
+    - platform: mqtt
+      name: "Garage Fridge"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "DF000A"
+      payload_off: "DF000E"
+      device_class: Cold
+      optimistic: false
+      qos: 1
+      retain: false
+    - platform: mqtt
+      name: "Shop Door"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "F8030A"
+      payload_off: "F8030E"
+      device_class: Door
+      optimistic: false
+      qos: 1
+      retain: false
+    - platform: mqtt
+      name: "Basment Water"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "84B90E"
+      device_class: Moisture
+      optimistic: false
+      qos: 1
+      retain: false
+
+    - platform: mqtt
+      name: "Office Wand"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "D31421"
+      payload_off: "D31421off"
+      qos: 1
+      retain: false
+    - platform: mqtt
+      name: "Office Book"
+      state_topic: "tele/RF_Bridge/RESULT"
+      value_template: '{{value_json.RfReceived.Data}}'
+      payload_on: "C7C2A1"
+      payload_off: "C7C2A19off"
+      qos: 1
+      retain: false
+    
+    # - platform: mqtt
+    #   state_topic: dummy/floorplan/sensor
+    #   name: Floorplan
+    - platform: ring
+    - platform: octoprint
+      monitored_conditions:
+      - Printing
+      - Printing Error
+
+#########################################
+################ Sonoffs & Switches ########
+#########################################
+switch:
+  - platform: mqtt
+    name: "Master Lights"
+    command_topic: "cmnd/Master_Lights/power3"
+    state_topic: "stat/Master_Lights/POWER3"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Master Fan"
+    command_topic: "cmnd/Master_Lights/power2"
+    state_topic: "stat/Master_Lights/POWER2"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Master Fire"
+    command_topic: "cmnd/Master_Lights/power1"
+    state_topic: "stat/Master_Lights/POWER1"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Boys Bathroom Lock"
+    command_topic: "cmnd/Boys_Bathroom_Lock/power"
+    state_topic: "stat/Boys_Bathroom_Lock/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Upstairs Fan"
+    command_topic: "cmnd/ThermoZztat/POWER1"
+    state_topic: "stat/ThermoZztat/POWER1"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Upstairs AC"
+    command_topic: "cmnd/ThermoZztat/POWER2"
+    state_topic: "stat/ThermoZztat/POWER2"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Upstairs Furnace"
+    command_topic: "cmnd/ThermoZztat/POWER3"
+    state_topic: "stat/ThermoZztat/POWER3"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Kids Bedroom Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER7"
+    state_topic: "stat/Radiant_Heat/POWER7"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Toy Room Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER6"
+    state_topic: "stat/Radiant_Heat/POWER6"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Main Floor Fan"
+    command_topic: "cmnd/MainAC/POWER1"
+    state_topic: "stat/MainAC/POWER1"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Main Floor AC"
+    command_topic: "cmnd/MainAC/POWER2"
+    state_topic: "stat/MainAC/POWER2"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Main Floor Heat"
+    command_topic: "cmnd/MainAC/POWER3"
+    state_topic: "stat/MainAC/POWER3"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Master Bedroom Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER1"
+    state_topic: "stat/Radiant_Heat/POWER1"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Kitchen Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER3"
+    state_topic: "stat/Radiant_Heat/POWER3"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Entryway Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER2"
+    state_topic: "stat/Radiant_Heat/POWER2"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Guest Bedroom Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER5"
+    state_topic: "stat/Radiant_Heat/POWER5"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Theater Room Heat"
+    command_topic: "cmnd/Radiant_Heat/POWER4"
+    state_topic: "stat/Radiant_Heat/POWER4"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  # - platform: mqtt
+  #   name: UK_1
+  #   command_topic: "cmnd/UK_1/power"
+  #   state_topic: "stat/UK_1/POWER"
+  #   qos: 1
+  #   payload_on: "ON"
+  #   payload_off: "OFF"
+  #   retain: false  
+  - platform: mqtt
+    name: "Office Lock"
+    command_topic: "cmnd/officelock/power"
+    state_topic: "stat/officelock/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  # - platform: mqtt
+  #   name: "Shop Lock"
+  #   command_topic: "cmnd/shoplock/power"
+  #   state_topic: "stat/shoplock/POWER"
+  #   qos: 1
+  #   payload_on: "ON"
+  #   payload_off: "OFF"
+  #   retain: false
+  # - platform: mqtt
+  #   name: "Garage Lights"
+  #   command_topic: "cmnd/GarageLights/power"
+  #   state_topic: "stat/GarageLights/POWER"
+  #   qos: 1
+  #   payload_on: "ON"
+  #   payload_off: "OFF"
+  #   retain: false 
+  - platform: mqtt
+    name: "Boys Shower"
+    command_topic: "cmnd/zzboysshower/power"
+    state_topic: "stat/zzboysshower/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false 
+  - platform: mqtt
+    name: "Back Porch"
+    command_topic: "cmnd/sonoff/power"
+    state_topic: "stat/sonoff/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false 
+  - platform: mqtt
+    name: "Front Porch"
+    command_topic: "cmnd/sonoff1/power"
+    state_topic: "stat/sonoff1/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Office Light"
+    command_topic: "cmnd/office_light/power"
+    state_topic: "stat/office_light/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Theater"
+    command_topic: "cmnd/ZzTheater/power"
+    state_topic: "stat/ZzTheater/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Toy Room"
+    command_topic: "cmnd/sonoff4/power"
+    state_topic: "stat/sonoff4/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Side Porch"
+    command_topic: "cmnd/sonoff5/power"
+    state_topic: "stat/sonoff5/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Office Fan"
+    command_topic: "cmnd/sonoff6/power"
+    state_topic: "stat/sonoff6/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Office Wall"
+    command_topic: "cmnd/sonoff9/power"
+    state_topic: "stat/sonoff9/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Upstairs Hall"
+    command_topic: "cmnd/sonoff10/power"
+    state_topic: "stat/sonoff10/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Sonoff 11"
+    command_topic: "cmnd/sonoff11/power"
+    state_topic: "stat/sonoff11/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    hidden: true
+    retain: false 
+  - platform: mqtt
+    name: "Sonoff 12"
+    command_topic: "cmnd/sonoff12/power"
+    state_topic: "stat/sonoff12/POWER1"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    hidden: true
+    retain: false
+  - platform: mqtt
+    name: "Office Crown"
+    command_topic: "cmnd/sonoffsv2/POWER1"
+    state_topic: "stat/sonoffsv2/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+  - platform: mqtt
+    name: "Master Crown"
+    command_topic: "cmnd/sonoffsv1/power"
+    state_topic: "stat/sonoffsv1/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false 
+  - platform: mqtt
+    name: "Boys Bathroom"
+    command_topic: "cmnd/sonoff15/power"
+    state_topic: "stat/sonoff15/POWER"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    retain: false
+
+  - platform: broadlink
+    host: 192.168.1.62
+    mac: '78:0f:77:5a:b5:2a'
+    type: rm_mini
+    switches:
+      office_tv:
+        friendly_name: "Office TV"
+        command_on: 'JgCAAQABJ5YRFBEUEjkRFBEUERQSFBEUETkROREUEjkRORE5ETkROREUEhQRFBE5ERQSFBEUERQRORE5EjkRFBE5ETkRORE5EgAFEgABKEsSAAxSAAEnTBEADFMAASdMEQAMUgABKEsSAAxSAAEnTBEADFIAASdMEQAMUgABKEwRAAxSAAEnTBEADFIAAShLEgAMUgABJ0wRAAxTAAEnTBEADFIAASdMEQAMUwABJ0wRAAxTAAEnTBEADFMAASdMEQAMUwABJ0wRAAxTAAEnTBEADFMAAShLEQAMUwABKEsSAAxSAAEoSxIADFIAAShMEQAMUgABKEsSAAxSAAEoSxIADFIAASdMEQAMUgABKEwRAAxSAAEnTBEADFMAASdMEQAMUgABKEsSAAxSAAEnTBEADFMAASdMEQAMUwABJ0wRAAxSAAEoTBEADFIAASdMEQAMUwABJ0wRAAxTAAEnTBEADFIAAShMEQAMUgABKEsSAAxSAAEnTBEADFMAAShMEQANBQAAAAAAAAAA'
+        command_off: 'JgCAAQABJ5YRFBEUEjkRFBEUERQSFBEUETkROREUEjkRORE5ETkROREUEhQRFBE5ERQSFBEUERQRORE5EjkRFBE5ETkRORE5EgAFEgABKEsSAAxSAAEnTBEADFMAASdMEQAMUgABKEsSAAxSAAEnTBEADFIAASdMEQAMUgABKEwRAAxSAAEnTBEADFIAAShLEgAMUgABJ0wRAAxTAAEnTBEADFIAASdMEQAMUwABJ0wRAAxTAAEnTBEADFMAASdMEQAMUwABJ0wRAAxTAAEnTBEADFMAAShLEQAMUwABKEsSAAxSAAEoSxIADFIAAShMEQAMUgABKEsSAAxSAAEoSxIADFIAASdMEQAMUgABKEwRAAxSAAEnTBEADFMAASdMEQAMUgABKEsSAAxSAAEnTBEADFMAASdMEQAMUwABJ0wRAAxSAAEoTBEADFIAASdMEQAMUwABJ0wRAAxTAAEnTBEADFIAAShMEQAMUgABKEsSAAxSAAEnTBEADFMAAShMEQANBQAAAAAAAAAA'
+      office_tv_vol:
+        friendly_name: "Office TV Vol"
+        command_on: 'JgDgAAABKZQTEhQSEzcTEhMSExMTEhMSEzcTNxQSEzcTNxM3EzcTOBMSEzcTEhMSFBITEhMSExIUNxMSEzcTNxM3FDcTNxM3EwAFEQABKUoTAAxSAAEpShMADFEAASpKEwAMUQABKUoTAAxRAAEqSRQADFEAASlKEwAMUQABKkoTAAxRAAEpShMADFEAASlKEwAMUgABJ0wRAAxTAAEnTBEADFMAAShLEgAMUgABKEsSAAxSAAEoSxIADFIAASpKEwAMUAABKkoTAAxQAAEoSxMADFEAASdMEwAMUQABJ0wRAA0FAAAAAAAAAAA='
+        command_off: 'JgDQAAABKpMUERQSEzcTEhMSFBITEhMSEzcUNhQSEzcTNxM3FDYUNxM3EzcTEhQRFBITEhMSFBEUEhMSEzcTNxQ2FDcTNxM3EwAFEQABKEsSAAxTAAEoSxMADFEAASpKEwAMUQABKkoTAAxRAAEpShMADFEAASpKEwAMUQABKUoTAAxRAAEqShMADFEAASpJFAAMUQABKUoTAAxRAAEqSRQADFEAASlKEwAMUQABKkoTAAxRAAEnTBEADFMAAShLEQAMVAABKUoRAAxTAAEoTBEADQUAAAAAAAAAAA=='
+      office_tv_mute:
+        friendly_name: "Office TV Mute/Input"
+        command_on: 'JgCQAQABKpMUEhMSEzcTEhQSExITEhMSFDYUNxMSEzcTNxQ2FDcTNxM3EzcUNhQ3ExITNxMSFBEUEhMSExIUERQ3ExITNxM3EwAFEQABKkkUAAxRAAEpShMADFEAASpJFAAMUQABKUoTAAxRAAEqSRQADFEAASlKEwAMUQABKkkUAAxQAAEqShMADFEAASlKEwAMUQABKUoTAAxRAAEqSRMADFEAASpJEwAMUQABKkkTAAxRAAEpShMADFEAASlKEwAMUQABKUoTAAxRAAEpShMADFEAASlKEwAMUQABKUoTAAxQAAEqSRQADFAAASlKEwAMUQABKkkUAAxQAAEqSRMADFEAASlKFAAMUAABKUoTAAxRAAEpShMADFAAASpJFAAMUAABKkoTAAxQAAEqSRQADFAAASpJFAAMUAABKkkUAAxQAAEpShMADFEAASlKEwAMUQABKUoTAAxQAAEqShMADFAAASpJEwAMUQABKUoTAAxRAAEpShMADFEAASlKEwAMUQABKkoTAAxRAAEpShMADQUAAAAAAAAAAA=='
+        command_off: 'JgAoAQABKpMUEhMSEzcTEhQRFBITEhMSFDYUNhQSEzcTNxM3FDYUNhQ3ExITEhQ2FBITEhMSFBEUEhM3EzcTEhQ2FDYUNxM3EwAFEQABKUoTAAxRAAEqSRMADFEAASlKEwAMUQABKkkTAAxRAAEqSRQADFAAASpJFAAMUAABKEwRAAxTAAEpShEADFMAASlKEwAMUQABKEsSAAxTAAEnTBEADFMAASdMEQAMUwABKEwRAAxTAAEnTBEADFQAASdMEQAMUwABJ0wRAAxTAAEoTBEADFMAASdMEgAMUgABKEwRAAxTAAEnTBEADFQAASdMEQAMUwABJ0wRAAxTAAEoSxIADFIAAShLEgAMUwABJ0wRAAxTAAEnTBEADFMAAShLEgAMUgABJ0wRAA0F'
+      desk_leds:
+        friendly_name: "Desk LEDs"
+        command_on: 'JgBgAQABKpURFBITEBURFBITERUQFBIUEDoSOBI4EDoSOBI4ETkSOBI4ERUQORE5ExMQFREUERQQFRI4EBUSExE6ETgRORM4EQAFIAABKksSAAxWAAEqShMADFYAASpKEwAMVgABKksSAAxWAAEqSxIADFYAAStJEgAMVwABKkoTAAxVAAErSRQADFUAASpKEwAMVQABKkoTAAxVAAEqSRMADFYAASlKEwAMVQABKkoTAAxVAAEqSRQADFUAASpJEwAMVQABKkoTAAxVAAEqSRQADFQAAStJEwAMVQABKkoTAAxVAAEqSRMADFUAASpJFAAMVAABKkoTAAxVAAEqSRMADFUAASpJFAAMVAABKkoTAAxVAAEpShMADFUAASpJEwAMVQABKkkUAAxVAAEpShMADFUAAShLEwAMVQABKkkUAAxUAAEqShMADFUAAShLEwAMVQABKEsUAAxVAAEqSRMADQUAAAAAAAAAAA=='
+        command_off: 'JgD4AgABKZURExITERURExIUEBURFBITEDoRORI4EDoSOBI4EDoSOBI4EDoSOBI4EDoSExEVERMSExEVERMSFBAVETkQORM4EQAFIAABKUsSAAxWAAEoSxIADFYAASlLEgAMVgABKUoTAAxVAAEpSxIADFYAASpKEgAMVgABKUsSAAxWAAEpShMADFUAASpKEgAMVgABKUoTAAxVAAEqShMADFUAASpKEwAMVQABKkoTAAxVAAEpTBIADFUAASpKEwAMVQABKkoTAAxVAAEqShMADFUAASpKEwAMVQABKkoTAAxVAAEqShMADFUAASpKEwAMVQABKkoTAAxVAAEqShMADFUAASpKEwAMVQABKkoSAAxWAAEpSxIADFYAASlLEgAMVQABKksSAAxVAAEqShMADFUAASpKEwAMVQABKkoTAAxVAAEqShIADFYAASpKEgAMVgABKkoSAAxWAAEpSxIADFYAASlLEgAMVgABKUsSAAxWAAEpSxIADFUAASpKEwAMVQABKkoTAAxVAAEpSxMADFUAASpKEwAMVQABKkoSAAxWAAEpSxIADFUAASpLEgAMVQABKkoTAAxVAAEqShIADFYAASpKEgAMVgABKkoSAAxWAAEpSxIADFYAASlLEgAMVQABKkoTAAxVAAEpSxIADFYAASlKEwAMVQABKkoSAAxWAAEpSxIADFUAASpKEgAMVgABKUoTAAxVAAEpShMADFUAASlLEgAMVQABKUsSAAxVAAEpSxIADFYAASlKEgAMVgABKUsSAAxVAAEpSxIADFYAASlKEwAMVQABKUsSAAxVAAEpSxEADFcAAShLEwAMVQABKkoRAAxWAAErSRIADFYAASpJFAAMVAABKkkUAAxUAAEqShMADFQAASpKEwAMVAABKkoTAAxUAAEqShIADFUAASpKEgAMVgABKUoTAAxVAAEpSxIADFUAAStJEwAMVQABKEsSAAxWAAEoTBEADFYAAStJEwAMVAABK0kUAAxUAAEqShIADQU='
+      xbox_power:
+        friendly_name: "Xbox Power"
+        command_on: 'JgBQAAABKJQTEhMTExITEhQSExIUEhM3ExMTEhMSFDcTNxQSEzcTOBMSEzcUEhM3FBITNxMTExITNxQSEzcUEhM3ExMTNxM3FAAFngABKUoTAA0FAAAAAAAAAAA='
+        command_off: 'JgBQAAABKJQTEhQSExIUEhMSFBITEhM3FBITEhQSEzcUNxMSEzgTNxM3FBITEhQ3ExITOBMSExIUEhM3FDcTEhM3FBITNxQ3EwAFnwABKUkTAA0FAAAAAAAAAAA='
+
+  - platform: broadlink
+    host: 192.168.1.66
+    mac: '78:0f:77:18:20:43'
+    type: rm2_pro_plus
+    switches:
+      tv:
+        friendly_name: "Projector"
+        command_on: 'JgC4AAABJJYQFBE5EBQQFRA5EDkRFBAVEDkQFBE5EDkQFRAUEDkRORAUETkQFBAVEBQRFBAVEBQQOhAUEDkRORA5EDkQORE5EAAFIwABJUsRAAxKAAElSxAADEwAASRMEAAMSwABJUsQAAxMAAEkTBAADEsAASVLEQAMSwABJEwQAAxLAAElSxEADEsAASRMEAAMSwABJUwQAAxLAAElSxAADEsAASVMEAAMSwABJUsRAAxLAAEkTBAADQU='
+        command_off: 'JgDwAAABJZUQFRA5EBUQFBA5ETkQFBEUEDkQFRA5EDkQFRAUETkQORAUETkQORA5EBUUNRAVEBQRORAUEBUQFBE5EBQRORA5EAAFIQABJksRAAxKAAElSxAADEsAASVLEQAMSgABJUwQAAxLAAEkTBAADEsAASVLEQAMSgABJUwQAAxLAAEkTBAADEsAASVLEQAMSgABJUwQAAxLAAEkTBAADEsAASVLEQAMSgABJUwQAAxLAAEkTBAADEsAASVLEQAMSgABJUwQAAxLAAEkTBAADEsAASVLEQAMSgABJUwQAAxLAAEkTBAADEsAASVLEAANBQAAAAAAAAAA'
+      volume:
+        friendly_name: "Projector Volume"
+        command_on: "JgCEAxMSEjcTEhMSExETEhMSExEUNhMSEzYTNxM2FDYTNxM2EwAE9gABJpMTEhM2ExITEhM2ExITNxM2EzcTEhM2EzcTERM3EzcSEhMSEzcTERMSExITEhISExITNxMREzcTNhM3EzcTNhQ2EwAE9QABJpQTERM3ExITERM3ExITNhM3EzYTEhM3EzYTEhM2EzcTEhMSEjcTEhMSExETEhMSExITNhMSEzYTNxM3EzYTNxM2EwAE9gABJpMUERM2ExITEhM2ExITNxM2EzcTEhM2EzcTERM3EzcTERMSEzcTERQRExITEhMRExITNxMREzcTNxI3EzcTNhM3EwAE9QABJpQTERM3ExITEhM2ExITNhM3FDUTEhM3EzYUERQ2EjcUERQREzYUERMSExETEhMSExITNhMSEzYTNxQ2EzYUNhM2EwAE9gABJpMUERQ1ExITEhM2FBETNxQ1FDYUERM2EzcUEBM3EzcTERMSFDYTERMSFBETEhMRExITNxMREzcTNxI3EzcTNhQ2FAAE9AABJpQTERM3FBETERM3ExIUNRQ2FDUUERQ2EzYTEhM3EzYUERMSEzYUERQRExETEhQRExITNhQRFDUUNhQ2EzYUNhM2FAAE9QABJ5IUERM2ExIUERQ1FBETNxQ1FDYUERM2FDYTERQ2FDYTERQRFDYTERQRExITEhMRExIUNhMREzcTNxM2FDYTNhM3EwAE9QABJpQSEhM3ExISEhM3ExITNhM3EzYTEhM3EjcTEhM2EzcTEhMSEjcTEhMSEhITEhMSExISNxMSEzYTNxM3EjcTNxM2EwAE9gABJpMTEhM2ExITEhM2ExITNxM2EzcTEhI3EzcTERM3EzcSEhMSEzcSEhMSExITEhISExITNxISEzcTNhM3EzcSNxM3EwAE9QABJpQSEhM3ExISEhM3ExITNhM3EzYTEhM3EzYTEhM2EzcTEhMSEjcTEhMSEhITEhMSExITNhMSEzYTNxM2EzcTNxM2EwAE9AABKJMTEhM2ExITEhM2ExITNxM2EzcTEhI3EzcTERM3EzYTEhMSEzcSEhMSExITEhISExIUNhMREzcTNhQ2EzcSNxM3EwAE9QABJ5ITEhM3FBESEhM3ExITNhM3EzYTEhM3EzYUERQ1FDYUERQQFDYUERQREhITEhMSExETNxMSEzYTNxM2EzcTNxI3EwANBQAAAAA="
+        command_off: "JgCEAxI4EjcSExITEhISExITEhMSEhITEjgSNxI4EzYTNxM2EwAE9gABJpMTEhM3ExEUERM3ExEUNhM3EzYTEhM2FDYTEhM2EzcTEhM2EzcTERQRExITEhMRFBEUERMSEzYTNxM2FDYTNhQ2EwAE9QABJ5MTEhM2ExITEhM2ExITNxM2EzcTERQ2EzcTERM3EzYUERM3EzYTEhMSExITERMSExITEhMREzcTNhQ2EzcTNhM3EwAE9QABJpMUERM3ExITERM3ExITNhM3EzYTEhM3EzYTEhM2FDYTEhM2EzcTEhMRExITEhMSExETEhMSEzYTNxM3EzYTNxM2EwAE9gABJpMTEhM2ExITEhM2FBETNxM2EzcTEhM2EzcTEhM2EzcTERM3EzYUERMSExITERQRExITEhMREzcTNhQ2EzcTNhM3EwAE9QABJpQTERQ2ExITEhM2ExITNhM3EzYUERM3EzYTEhM3EzYTEhM2FDYTEhMSExETEhMSExITERMSEzcTNhM3EzYTNxM2FAAE9QABJpMTEhM3ExETEhM3ExETNxM2FDYTEhM2EzcTEhM2EzcTEhM2EzcTERMSExITEhMRExITEhMSEzYTNxM2EzcTNhQ2EwAE9QABJ5MTEhM2ExITEhM2ExITNxM2EzcTERM3EzYUERM3EzYTEhM3EzYTEhMSExEUERMSExITERQREzcTNhM3EzYUNhM3EwAE9QABJpMUERM3ExITERM3ExITNhM3EzYTEhM2FDYTEhM2FDYTEhM2EzcTEhMRExITEhMSExETEhMSEzYTNxM2FDYTNhQ2EwAE9gABJpMTEhM2ExITEhM2ExITNxM2EzcTEhM2EzcTERM3EzYUERM3EzYTEhMSExITERMSExITEhMREzcTNhQ2EzcTNhM3EwAE9QABJpMUERM3ExITERM3ExITNhM3EzYTEhM3EzYTEhM2FDYTEhM2EzcTEhMRFBETEhMSExETEhMSEzYUNhM3EzYTNxM2EwAE9gABJpMTEhM2FBETEhM2FBETNxM2EzcTEhM2EzcTEhM2EzcTERM3EzYUERMSExITERQRExITEhMRFDYTNxM2EzcTNhM3EwAE9QABJZUSExI3EhMSEhM3EhMSNxI4EjcTEhE5EjcSExE5ETgRFBE4ETkRFBEUERMRFBEUERQQFBEUETkROBE5ETgRORE4EQANBQAAAAA="
+
+tuya:
+  username: !secret tuya_user
+  password: !secret tuya_pw
+  country_code: 1
+
+#########################################
+########### Garage Door Controls #########
+#########################################
+
+cover:
+  - platform: mqtt
+    name: "test"
+    state_topic: "cmnd/2/POWER2"
+    command_topic: "cmnd/sonoffSV04/POWER"
+    payload_open: "ON"
+    payload_close: "ON"
+    payload_stop: "ON"
+    state_open: "ON"
+    state_closed: "OFF"
+    optomistic: false
+    retain: false
+  - platform: mqtt
+    name: "double"
+    state_topic: "cmnd/gState/POWER2"
+    command_topic: "cmnd/JanisGarage/POWER"
+    payload_open: "ON"
+    payload_close: "ON"
+    payload_stop: "ON"
+    state_open: "ON"
+    state_closed: "OFF"
+    optomistic: false
+    retain: false
+
+#############################
+
+# Text to speech
+tts:
+  platform: google
+
+ios:
+  push:
+    categories:
+      - name: garage1
+        identifier: 'GARAGE1'
+        actions:
+          - identifier: 'CLOSE_JANIS' ## this must point to an action ##
+            title: 'Close Janis Garage Door'
+      - name: garage2
+        identifier: 'GARAGE2'
+        actions:
+          - identifier: 'CLOSE_JUSTIN' ## this must point to an action ##
+            title: 'Close Justin Garage Door'
+      - name: michigan
+        identifier: 'GAME'
+        actions:
+          - identifier: 'WIN'
+            title: 'They Won!'
+          - identifier: 'LOSS'
+            title: 'Not this time...'
+      - name: door
+        identifier: 'DOOR'
+        actions:
+          - identifier: 'OPEN_FIRST' ## these need to point to an action ##
+            title: 'Open First'
+          - identifier: 'OPEN_SECOND'
+            title: 'Open Second'
+          - identifier: 'OPEN_THIRD'
+            title: 'Open Third'
+
+########################
+notify:
+  - name: Drzzs xbox
+    platform: rest
+    resource: https://xboxapi.com/v2/messages
+    method: POST_JSON
+    headers:
+      Content-Type: application/json
+      X-Auth: !secret xboxapi_token
+    data:
+      to:
+        - !secret DrZzs
+###################################################
+##### Input Boolean #####
+###################################################      
+      
+input_boolean:
+  sunday_music:
+    name: Sunday Music
+    icon: mdi:music
+  rock_music:
+    name: Rock On
+    icon: mdi:guitar-electric
+  country_music:
+    name: Country
+    icon: mdi:guitar-acoustic
+  lindsay_music:
+    name: Lindsay
+    icon: mdi:play
+  kids_bop:
+    name: Kids Bop
+    icon: mdi:flower-tulip
+  receiver:
+    name: Projector Sound
+    icon: mdi:surround-sound
+  office_on:
+    name: I'm Home
+    initial: off
+  office_off:
+    name: Off to Bed
+    initial: off
+  garage_blink:
+    name: Garage Blink
+  test_trigger:
+    name: Trigger for the test ### Trigger for the alert ###
+    initial: off
+    icon: mdi:pot-mix
+  result:
+    name: Results switch  ### condition for the alert ###
+    initial: off
+    icon: mdi:test-tube
+  goblue:
+    name: Go Blue!
+    initial: off
+    icon: mdi:football-helmet
+  garagetest:
+    name: Garage Test
+    initial: off
+
+# arlo:
+#   username: !secret arlo_user
+#   password: !secret arlo_pw
+
+juicenet:
+    access_token: !secret juicenet_token
+
+device_tracker:
+  - platform: owntracks_http
+  # - platform: google_maps
+  #   username: DrZzs.HA@gmail.com
+  #   password: !secret DrZ_gMap_PW
+
+media_player:
+  - platform: alexa
+    email: "jmcdonaz@umich.edu"
+    password: !secret alexa_pw
+    url: "amazon.com"
+  - platform: spotify
+    client_id: !secret spotify_id
+    client_secret: !secret spotify_secret
+  - platform: floorplan_speaker
+    name: my_html5_speakers
+
+influxdb:
+  host: a0d7b954-influxdb
+  port: 8086
+  database: homeassistant
+  username: homeassistant
+  password: !secret influx_pw
+  max_retries: 3
+  default_measurement: state
+
+group: !include groups.yaml
+
+script: !include scripts.yaml
+
+automation: !include automations.yaml
+
+ring:
+    username: !secret ring_user
+    password: !secret ring_pw
+
+cloud:
+
+config:
+
+climate:
+  - platform: generic_thermostat
+    name: Upstairs Heat
+    heater: switch.upstairs_furnace
+    target_sensor: sensor.average_upstairs_temp
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 20
+    initial_operation_mode: "off"
+    target_temp: 72
+    away_temp: 60
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Upstairs AC
+    heater: switch.upstairs_ac
+    target_sensor: sensor.average_upstairs_temp
+    min_temp: 40
+    max_temp: 90
+    initial_operation_mode: "off"    
+    min_cycle_duration:
+      minutes: 20
+    target_temp: 74
+    away_temp: 80
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+    ac_mode: true
+    
+  - platform: generic_thermostat
+    name: Kids Bedroom Heat
+    heater: switch.kids_bedroom_heat
+    target_sensor: sensor.average_kids_temp
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+
+  - platform: generic_thermostat
+    name: Toy Room Heat
+    heater: switch.toy_room_heat
+    target_sensor: sensor.blink_toy_room_temperature
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Main Floor AC
+    heater: switch.main_floor_ac
+    target_sensor: sensor.average_main_temp
+    min_temp: 40
+    max_temp: 90
+    initial_operation_mode: "auto"
+    away_temp: 80
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+    ac_mode: true
+  - platform: generic_thermostat
+    name: Main Floor Heat
+    heater: switch.main_floor_heat
+    target_sensor: sensor.average_main_temp
+    min_temp: 40
+    max_temp: 90
+    initial_operation_mode: "off"
+    away_temp: 50
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Master Bedroom Heat
+    heater: switch.master_bedroom_heat
+    target_sensor: sensor.master_bedroom_temp
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Kitchen Heat
+    heater: switch.kitchen_heat
+    target_sensor: sensor.kitchen_temp
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Entryway Heat
+    heater: switch.entryway_heat
+    target_sensor: sensor.blink_piano_room_temperature
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Guest Bedroom Heat
+    heater: switch.guest_bedroom_heat
+    target_sensor: sensor.blink_basement_temperature
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+  - platform: generic_thermostat
+    name: Theater Room Heat
+    heater: switch.theater_room_heat
+    target_sensor: sensor.blink_basement_temperature
+    min_temp: 40
+    max_temp: 90
+    min_cycle_duration:
+      minutes: 30
+    initial_operation_mode: "auto"
+    away_temp: 64
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+
+homekit:
+  auto_start: false
+  filter:
+    exclude_domains:
+      - automation
+      - input_boolean
+      - script
+    exclude_entities:
+      - sensor.octoprint_actual_bed_temp
+      - sensor.octoprint_actual_tool0_temp
+      - sensor.octoprint_job_percentage
+      - sensor.octoprint_target_bed_temp
+      - sensor.octoprint_target_tool0_temp
+      - sensor.ring_front_door_battery
+      - sensor.ring_front_door_last_activity
+      - sensor.ring_front_door_last_ding
+      - sensor.ring_front_door_last_motion
+      - sensor.ring_front_door_volume
+      - sensor.ring_front_door_wifi_signal_category
+      - sensor.ring_front_door_wifi_signal_strength
+    include_entities:
+      - binary_sensor.octoprint_printing
+  entity_config:
+    media_player.volumio_volumiohomelocal:
+      feature_list:
+        - feature: on_off
+        - feature: play_pause
+        - feature: play_stop
+        - feature: toggle_mute
+    switch.taz_5:
+      type: outlet 
+    switch.garage_lights:
+      name: Garage LEDs
+
+recorder:
+  exclude:
+    domains:
+      - automation
+      - weblink
+      - updater
+      - group
+      - input_boolean
+      - input_number
+      - input_select
+      - media_player
+      - weather
+      - zone
+    entities:
+      - sun.sun
+#   purge_keep_days: 30
+#   purge_interval: 10
+
